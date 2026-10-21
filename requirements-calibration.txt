@@ -1,0 +1,4 @@
+# Only needed to refresh the historical calibration snapshot.
+akshare>=1.19
+pandas>=2.0
+requests>=2.31

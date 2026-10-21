@@ -1,0 +1,16 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+backend/data/
+runs/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+.DS_Store
+# Local project report; never publish it.
+项目报告/
+# Temporary headless-browser profiles.
+.edge-*/
