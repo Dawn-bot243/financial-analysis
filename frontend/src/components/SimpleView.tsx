@@ -6,6 +6,7 @@ import { Field, NumberInput, PercentInput, WanInput } from './inputs'
 import StatTile from './StatTile'
 import FanChart from './FanChart'
 import DrawdownChart from './DrawdownChart'
+import AnalysisPanel from './AnalysisPanel'
 
 const SIMPLE_PATHS = 5000
 const SIMPLE_SEED = 42
@@ -14,7 +15,11 @@ const DEFAULT_WEIGHTS: Record<string, number> = {
   csi300: 0.32,
   csi500: 0.16,
   dividend: 0.16,
+  sse: 0,
+  sp500: 0,
   ndx100: 0.16,
+  nikkei: 0,
+  hsi: 0,
   gold: 0.04,
   bond: 0.16,
   cash: 0,
@@ -313,7 +318,9 @@ export default function SimpleView({
         <p className="form-note">
           收益、波动和相关性来自{windowLabel(windowKey)}官方全收益/财富指数校准，
           不是预测；资产收益未扣产品费率。简版固定使用 {SIMPLE_PATHS.toLocaleString()}{' '}
-          条路径和随机种子 {SIMPLE_SEED}，不包含应急金、负债、人生事件和 AI 解释。
+          条路径和随机种子 {SIMPLE_SEED}，不包含应急金、负债和人生事件；
+          AI 分析与建议可在结果页按需生成。上证指数、日经225、恒生指数的历史
+          为“官方全收益 + ETF复权补长”，详见完整版的校准来源。
         </p>
       </form>
 
@@ -381,6 +388,7 @@ export default function SimpleView({
 
             <FanChart run={result} simple />
             <DrawdownChart run={result} />
+            <AnalysisPanel mode="simple" runId={result.run_id} />
 
             <p className="chart-footnote">
               期末资产是今日购买力；分位数为逐时点边际分布，不代表单条路径始终落在带内。

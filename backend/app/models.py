@@ -455,6 +455,57 @@ class Explanation(BaseModel):
     templates: dict | None = None
 
 
+class AnalysisRequest(BaseModel):
+    """On-demand LLM analysis for an existing run."""
+
+    mode: Literal["simple", "full", "history"]
+    run_id: str = Field(min_length=4, max_length=64)
+    force: bool = False
+
+
+class AnalysisMetric(BaseModel):
+    key: str
+    label: str
+    value: float
+    formatted: str
+    delta: float | None = None
+    delta_formatted: str | None = None
+    better: Literal["better", "worse", "neutral"] = "neutral"
+
+
+class WhatIfVariant(BaseModel):
+    key: str
+    label: str
+    description: str
+    changes: dict[str, Any] = Field(default_factory=dict)
+    metrics: list[AnalysisMetric] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+class AnalysisResponse(BaseModel):
+    analysis_id: str
+    created_at: str
+    mode: Literal["simple", "full", "history"]
+    run_id: str
+    source: Literal["template", "llm"]
+    model: str | None = None
+    summary: str
+    findings: list[str]
+    suggestions: list[str]
+    caveats: list[str]
+    metric_refs: list[str]
+    metric_order: list[str] = Field(default_factory=list)
+    metric_labels: dict[str, str] = Field(default_factory=dict)
+    variants: list[WhatIfVariant] = Field(default_factory=list)
+    facts: dict[str, Any] = Field(default_factory=dict)
+    templates: dict | None = None
+    warnings: list[str] = Field(default_factory=list)
+    code_version: str
+    code_fingerprint: str
+    data_version: str = "none"
+    disclaimer: str = "以上为情景推演与局部 what-if 分析，不构成投资建议。"
+
+
 class RunResponse(BaseModel):
     run_id: str
     created_at: str
@@ -563,6 +614,234 @@ class HistoryMetaResponse(BaseModel):
     latest_date: date
     assets: list[HistoryAssetMeta]
     disclaimer: str
+
+
+CashflowDirection = Literal[
+    "income", "expense", "transfer", "investment", "ignore"
+]
+InvestmentBucket = Literal["cash", "a_share", "overseas", "gold", "bond", "other"]
+InvestmentAction = Literal["buy", "sell"]
+CashflowRuleField = Literal["counterparty", "description", "category", "any"]
+
+
+class CashflowMapping(BaseModel):
+    date: str = ""
+    amount: str = ""
+    income_amount: str | None = None
+    expense_amount: str | None = None
+    direction: str | None = None
+    counterparty: str | None = None
+    description: str | None = None
+    category: str | None = None
+    account: str | None = None
+    status: str | None = None
+    header_row: int = 0
+    amount_mode: Literal[
+        "signed", "positive_expense", "absolute", "two_columns"
+    ] = "signed"
+    direction_values: dict[str, CashflowDirection] = Field(
+        default_factory=lambda: {
+            "收入": "income",
+            "支出": "expense",
+            "不计收支": "ignore",
+            "中性交易": "ignore",
+            "/": "ignore",
+            "—": "ignore",
+            "转账": "transfer",
+            "income": "income",
+            "expense": "expense",
+            "credit": "income",
+            "debit": "expense",
+            "贷": "income",
+            "借": "expense",
+        }
+    )
+
+
+class CashflowPreview(BaseModel):
+    headers: list[str]
+    rows: list[dict[str, str]]
+    suggested_mapping: CashflowMapping
+    header_row: int
+    encoding: str
+    total_rows: int
+
+
+class CashflowTransaction(BaseModel):
+    id: int
+    import_id: str
+    source: str
+    account: str
+    date: date
+    amount: float
+    direction: CashflowDirection
+    category: str
+    bucket: InvestmentBucket | None = None
+    investment_action: InvestmentAction | None = None
+    counterparty: str = ""
+    description: str = ""
+    raw_category: str = ""
+    is_one_off: bool = False
+    note: str = ""
+    category_source: Literal["rule", "manual", "import"] = "rule"
+    fingerprint: str = ""
+    raw_json: str = ""
+    created_at: str = ""
+
+
+class CashflowTransactionList(BaseModel):
+    items: list[CashflowTransaction]
+    total: int
+
+
+class CashflowTransactionPatch(BaseModel):
+    direction: CashflowDirection | None = None
+    category: str | None = None
+    bucket: InvestmentBucket | None = None
+    investment_action: InvestmentAction | None = None
+    is_one_off: bool | None = None
+    note: str | None = None
+
+
+class CashflowRule(BaseModel):
+    id: int
+    priority: int = 0
+    pattern: str
+    match_field: CashflowRuleField = "any"
+    direction: CashflowDirection | None = None
+    category: str
+    bucket: InvestmentBucket | None = None
+    investment_action: InvestmentAction | None = None
+    enabled: bool = True
+    note: str = ""
+
+
+class CashflowRuleInput(BaseModel):
+    priority: int = 0
+    pattern: str = Field(min_length=1)
+    match_field: CashflowRuleField = "any"
+    direction: CashflowDirection | None = None
+    category: str = Field(min_length=1)
+    bucket: InvestmentBucket | None = None
+    investment_action: InvestmentAction | None = None
+    enabled: bool = True
+    note: str = ""
+
+
+class CashflowBalanceInput(BaseModel):
+    date: date
+    bucket: InvestmentBucket
+    balance: float = Field(ge=0.0)
+    note: str = ""
+
+
+class CashflowBalance(BaseModel):
+    id: int
+    date: date
+    bucket: InvestmentBucket
+    balance: float
+    note: str = ""
+    source: str = "manual"
+    updated_at: str = ""
+
+
+class CashflowMonth(BaseModel):
+    month: str
+    income: float
+    expense: float
+    net_savings: float
+    savings_rate: float | None = None
+    income_recurring: float
+    expense_recurring: float
+    net_savings_recurring: float
+    savings_rate_recurring: float | None = None
+    investment_buy: float
+    investment_sell: float
+    investment_net: float
+    bucket_buy: dict[str, float] = Field(default_factory=dict)
+    one_off_income: float
+    one_off_expense: float
+    transaction_count: int
+    uncategorized_count: int
+
+
+class CashflowCategoryTotal(BaseModel):
+    category: str
+    amount: float
+    one_off_amount: float
+    share: float
+    count: int
+
+
+class CashflowBucketFlow(BaseModel):
+    bucket: InvestmentBucket
+    buy: float
+    sell: float
+    net: float
+    buy_share: float
+
+
+class CashflowBalancePoint(BaseModel):
+    month: str
+    balances: dict[str, float]
+    total: float
+
+
+class CashflowSummary(BaseModel):
+    from_date: date | None = None
+    to_date: date | None = None
+    latest_month: str | None = None
+    inflation_assumption: float = 0.02
+    months: list[CashflowMonth] = Field(default_factory=list)
+    income_categories: list[CashflowCategoryTotal] = Field(default_factory=list)
+    expense_categories: list[CashflowCategoryTotal] = Field(default_factory=list)
+    investment_buckets: list[CashflowBucketFlow] = Field(default_factory=list)
+    balances: list[CashflowBalancePoint] = Field(default_factory=list)
+    latest_balances: dict[str, float] = Field(default_factory=dict)
+    total_income: float = 0.0
+    total_expense: float = 0.0
+    total_net_savings: float = 0.0
+    savings_rate: float | None = None
+    transaction_count: int = 0
+    uncategorized_count: int = 0
+    warnings: list[str] = Field(default_factory=list)
+
+
+class CashflowAssumptionPreview(BaseModel):
+    monthly_income: float
+    monthly_expense: float
+    savings_rate: float | None = None
+    months_used: int
+    window_start: str
+    window_end: str
+    excluded_one_off_count: int = 0
+    inflation_assumption: float = 0.02
+    warnings: list[str] = Field(default_factory=list)
+
+
+class CashflowImportBatch(BaseModel):
+    import_id: str
+    created_at: str
+    source: str
+    account: str
+    filename: str
+    row_count: int
+    imported: int
+    duplicates: int
+    skipped: int
+    warnings: list[str] = Field(default_factory=list)
+
+
+class CashflowImportResult(BaseModel):
+    import_id: str
+    source: str
+    account: str
+    filename: str
+    row_count: int
+    imported: int
+    duplicates: int
+    skipped: int
+    warnings: list[str] = Field(default_factory=list)
 
 
 class CompareItem(BaseModel):

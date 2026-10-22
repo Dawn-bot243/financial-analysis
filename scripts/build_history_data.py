@@ -7,8 +7,13 @@ snapshot that the app reads at runtime.
 
 Sources:
   - CSI H00300 / H00905 / H00922 total-return indices
-  - Nasdaq XNDX USD total return converted to CNY (BOC USD/CNY)
-  - COMEX continuous gold (USD/oz) converted to CNY/gram (BOC USD/CNY);
+  - S&P 500 Total Return (USD) and Nasdaq XNDX (USD), converted to CNY
+  - Shanghai Composite Total Return 000888, extended earlier with 510210
+    ETF cumulative NAV
+  - Nikkei 225 Total Return, extended earlier with 1320.T ETF adjusted NAV
+  - Hang Seng Gross Total Return 10068, extended earlier with 2800.HK ETF
+    adjusted NAV
+  - COMEX continuous gold (USD/oz) converted to CNY/gram;
     this is a 20-year gold price proxy, not Shanghai Gold Exchange Au99.99
   - ChinaBond New Composite Wealth Index (total return)
 
@@ -35,12 +40,36 @@ OUT_PATH = ROOT / "backend" / "app" / "data" / "history.json"
 
 END = pd.Timestamp("2026-10-20")
 INFLATION = 0.02
-ASSET_ORDER = ["csi300", "csi500", "dividend", "ndx100", "gold", "bond"]
+ASSET_ORDER = [
+    "csi300",
+    "csi500",
+    "dividend",
+    "sse",
+    "sp500",
+    "ndx100",
+    "nikkei",
+    "hsi",
+    "gold",
+    "bond",
+]
 
 FALLBACK_META = {
     "csi300": ("沪深300", "CSI H00300 沪深300全收益指数"),
     "csi500": ("中证500", "CSI H00905 中证500全收益指数"),
     "dividend": ("中证红利", "CSI H00922 中证红利全收益指数"),
+    "sse": (
+        "上证指数",
+        "上证综合全收益 000888（2020-07 起）+ 510210 上证指数ETF 复权净值（更早）",
+    ),
+    "sp500": ("标普500", "S&P 500 Total Return（USD）× 中行 USD/CNY"),
+    "nikkei": (
+        "日经225",
+        "Nikkei 225 Total Return（2023-01 起官方）+ 1320.T ETF 复权（更早）× 中行 JPY/CNY",
+    ),
+    "hsi": (
+        "恒生指数",
+        "恒生指数总收益 10068（2021-10 起官方）+ 2800.HK ETF 复权（更早）× 中行 HKD/CNY",
+    ),
     "ndx100": (
         "纳斯达克100（人民币，未对冲）",
         "Nasdaq XNDX 全收益（USD）× 中行 USD/CNY 中间价",
@@ -109,8 +138,13 @@ def main() -> None:
         "end": END.date().isoformat(),
         "asset_order": ASSET_ORDER,
         "source_note": (
-            "全部权益与债券使用官方全收益/财富指数；纳指100 为人民币、含汇率、未对冲；"
-            "黄金为 COMEX 黄金连续（USD/oz）× 中行 USD/CNY 折算人民币/克，含汇率、未对冲、无分红。"
+            "全部权益与债券使用官方全收益/财富指数；标普500、纳指100、日经225、恒生指数"
+            "均按中行汇率换算人民币、含汇率、未对冲。"
+            "上证指数、日经225、恒生指数为“官方全收益 + ETF复权净值补长”："
+            "官方段从各自可得日期开始，更早区间用对应ETF（510210、1320.T、2800.HK）"
+            "复权净值，含分红、扣ETF费率；不是纯官方指数。"
+            "黄金为 COMEX 黄金连续（USD/oz）× 中行 USD/CNY 折算人民币/克，"
+            "含汇率、未对冲、无分红。"
             "价格已按 2% 通胀折算成今日购买力，并在各自首个交易日归一为 1。"
             "官方指数未扣产品费率。"
         ),

@@ -6,6 +6,7 @@ import DrawdownChart from './DrawdownChart'
 import ShortfallPanel from './ShortfallPanel'
 import WindowEventsPanel from './WindowEventsPanel'
 import ExplanationPanel from './ExplanationPanel'
+import AnalysisPanel from './AnalysisPanel'
 import RunMeta from './RunMeta'
 
 const kindLabels: Record<string, string> = {
@@ -143,6 +144,7 @@ export default function ResultsView({ run }: { run: RunResponse }) {
 
       <CompositionPanel run={run} />
       <ExplanationPanel explanation={run.explanation} />
+      <AnalysisPanel mode="full" runId={run.run_id} />
       <RunMeta run={run} />
     </div>
   )

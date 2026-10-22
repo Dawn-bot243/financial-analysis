@@ -10,12 +10,17 @@ import { fmtMoney, fmtPct } from '../format'
 import { Field, NumberInput, PercentInput, WanInput } from './inputs'
 import StatTile from './StatTile'
 import HistoryPathChart from './HistoryPathChart'
+import AnalysisPanel from './AnalysisPanel'
 
 const DEFAULT_WEIGHTS: Record<string, number> = {
   csi300: 0.35,
   csi500: 0.15,
   dividend: 0.15,
+  sse: 0,
+  sp500: 0,
   ndx100: 0.15,
+  nikkei: 0,
+  hsi: 0,
   gold: 0.05,
   bond: 0.15,
 }
@@ -217,7 +222,7 @@ export default function HistoryView() {
           <div>
             <h2 className="card-title">历史定投回测</h2>
             <p className="card-sub">
-              用官方全收益指数的日频真实数据，回测一段历史区间内每月定投的结果。
+              用官方全收益/ETF补长的日频真实数据，回测一段历史区间内每月定投的结果。
             </p>
           </div>
           <button type="submit" className="btn btn-primary" disabled={busy}>
@@ -411,11 +416,11 @@ export default function HistoryView() {
         </div>
 
         <p className="form-note">
-          历史回测使用官方全收益/财富指数，已按 {(
-            meta.inflation_assumption * 100
-          ).toFixed(0)}
+          历史回测使用官方全收益/财富指数；上证指数、日经225、恒生指数为
+          “官方TR + ETF复权补长”，ETF段含分红也扣ETF费率，不是纯官方指数。已按{' '}
+          {(meta.inflation_assumption * 100).toFixed(0)}
           % 通胀折算成今日购买力；官方指数未扣产品费率。黄金为 2006-01
-          起的 COMEX×汇率人民币金价，纳指人民币从 2010-01 开始，长区间会自动裁剪。
+          起的 COMEX×汇率人民币金价，长区间会自动裁剪。
         </p>
       </form>
 
@@ -497,6 +502,7 @@ export default function HistoryView() {
             </div>
 
             <HistoryPathChart history={result} />
+            <AnalysisPanel mode="history" runId={result.run_id} />
 
             {result.final_composition.length > 1 ? (
               <section className="card composition-card">

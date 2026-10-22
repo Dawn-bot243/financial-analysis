@@ -12,5 +12,7 @@ frontend/.vite/
 .DS_Store
 # Local project report; never publish it.
 项目报告/
+# Raw financial statements and sample imports; never publish them.
+import_samples/
 # Temporary headless-browser profiles.
 .edge-*/

@@ -497,15 +497,40 @@ def _check_no_raw_numbers(
         raise LLMValidationError("LLM 文本包含未经占位符引用的百分比表述")
     if re.search(r"[一二三四五六七八九十百千万亿]+(?:年|岁|元|万|成|倍|个月)", stripped):
         raise LLMValidationError("LLM 文本包含未经占位符引用的数量表述")
-    forbidden = ["买入", "卖出", "推荐", "稳赚", "必涨", "抄底", "满仓", "梭哈"]
+    forbidden = [
+        "买入",
+        "卖出",
+        "稳赚",
+        "必涨",
+        "抄底",
+        "满仓",
+        "梭哈",
+        "加仓",
+        "减仓",
+        "清仓",
+    ]
     for phrase in forbidden:
         if phrase in stripped:
             raise LLMValidationError(f"LLM 文本包含不当建议措辞：{phrase}")
-    # "不保证收益" is a legitimate caveat; "保证收益" is a promise.
-    for phrase in ("保证", "承诺"):
+
+    def negated_in_clause(text: str, position: int) -> bool:
+        # Look at the current clause, not the whole sentence: "不保证收益，
+        # 但承诺保本" must still reject the promise in the second clause.
+        boundary = max(
+            (text.rfind(char, 0, position) for char in "，,。！？；\n"),
+            default=-1,
+        )
+        prefix = text[boundary + 1 : position]
+        return any(
+            word in prefix
+            for word in ("不", "未", "无", "非", "无法", "不能", "难以", "不会", "没有", "并非")
+        )
+
+    # "不保证收益" and "不推荐具体产品" are legitimate caveats; the positive
+    # forms are promises or product recommendations.
+    for phrase in ("保证", "承诺", "推荐"):
         for match in re.finditer(phrase, stripped):
-            prefix = stripped[max(0, match.start() - 4) : match.start()]
-            if any(negation in prefix for negation in ("不", "无法", "不能", "难以")):
+            if negated_in_clause(stripped, match.start()):
                 continue
             raise LLMValidationError(f"LLM 文本包含不当建议措辞：{phrase}")
 
@@ -626,7 +651,12 @@ def _build_llm_prompt(
     return "\n".join(lines)
 
 
-def _call_llm(prompt: str, settings: Any) -> str:
+def _call_llm(
+    prompt: str,
+    settings: Any,
+    system_prompt: str = SYSTEM_PROMPT,
+    max_tokens: int = 2000,
+) -> str:
     """Call an OpenAI-compatible endpoint with requests.
 
     The openai SDK in this environment pulls in an httpx2 version with a broken
@@ -643,14 +673,14 @@ def _call_llm(prompt: str, settings: Any) -> str:
     payload = {
         "model": settings.llm_model,
         "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ],
         "temperature": 0.2,
         # Window explanations include several placeholders per event; 900
         # tokens can truncate the JSON mid-string and force a template
         # fallback.
-        "max_tokens": 2000,
+        "max_tokens": max_tokens,
         "response_format": {"type": "json_object"},
     }
     response = requests.post(

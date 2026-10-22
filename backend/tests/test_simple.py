@@ -44,7 +44,7 @@ def test_simple_run_maps_to_a_constant_allocation_scenario():
     assert household["emergency_fund_months"] == pytest.approx(0.0)
     assert household["events"] == []
     assert household["liabilities"] == []
-    assert len(household["holdings"]) == 7
+    assert len(household["holdings"]) == 11
     positive = [
         holding
         for holding in household["holdings"]

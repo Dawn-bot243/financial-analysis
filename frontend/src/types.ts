@@ -333,6 +333,276 @@ export interface RunResponse {
   data_version: string
 }
 
+export type AnalysisMode = 'simple' | 'full' | 'history'
+
+export interface AnalysisRequest {
+  mode: AnalysisMode
+  run_id: string
+  force?: boolean
+}
+
+export interface AnalysisMetric {
+  key: string
+  label: string
+  value: number
+  formatted: string
+  delta: number | null
+  delta_formatted: string | null
+  better: 'better' | 'worse' | 'neutral'
+}
+
+export interface WhatIfVariant {
+  key: string
+  label: string
+  description: string
+  changes: Record<string, unknown>
+  metrics: AnalysisMetric[]
+  warnings: string[]
+}
+
+export interface AnalysisResponse {
+  analysis_id: string
+  created_at: string
+  mode: AnalysisMode
+  run_id: string
+  source: 'template' | 'llm'
+  model: string | null
+  summary: string
+  findings: string[]
+  suggestions: string[]
+  caveats: string[]
+  metric_refs: string[]
+  metric_order: string[]
+  metric_labels: Record<string, string>
+  variants: WhatIfVariant[]
+  facts: Record<string, unknown>
+  templates: Record<string, unknown> | null
+  warnings: string[]
+  code_version: string
+  code_fingerprint: string
+  data_version: string
+  disclaimer: string
+}
+
+export type CashflowDirection =
+  | 'income'
+  | 'expense'
+  | 'transfer'
+  | 'investment'
+  | 'ignore'
+
+export type InvestmentBucket =
+  | 'cash'
+  | 'a_share'
+  | 'overseas'
+  | 'gold'
+  | 'bond'
+  | 'other'
+
+export type InvestmentAction = 'buy' | 'sell'
+
+export interface CashflowMapping {
+  date: string
+  amount: string
+  income_amount?: string | null
+  expense_amount?: string | null
+  direction?: string | null
+  counterparty?: string | null
+  description?: string | null
+  category?: string | null
+  account?: string | null
+  status?: string | null
+  header_row: number
+  amount_mode: 'signed' | 'positive_expense' | 'absolute' | 'two_columns'
+  direction_values: Record<string, CashflowDirection>
+}
+
+export interface CashflowPreview {
+  headers: string[]
+  rows: Record<string, string>[]
+  suggested_mapping: CashflowMapping
+  header_row: number
+  encoding: string
+  total_rows: number
+}
+
+export interface CashflowTransaction {
+  id: number
+  import_id: string
+  source: string
+  account: string
+  date: string
+  amount: number
+  direction: CashflowDirection
+  category: string
+  bucket: InvestmentBucket | null
+  investment_action: InvestmentAction | null
+  counterparty: string
+  description: string
+  raw_category: string
+  is_one_off: boolean
+  note: string
+  category_source: 'rule' | 'manual' | 'import'
+  fingerprint: string
+  raw_json: string
+  created_at: string
+}
+
+export interface CashflowTransactionList {
+  items: CashflowTransaction[]
+  total: number
+}
+
+export interface CashflowTransactionPatch {
+  direction?: CashflowDirection
+  category?: string
+  bucket?: InvestmentBucket | null
+  investment_action?: InvestmentAction | null
+  is_one_off?: boolean
+  note?: string
+}
+
+export interface CashflowRule {
+  id: number
+  priority: number
+  pattern: string
+  match_field: 'counterparty' | 'description' | 'category' | 'any'
+  direction: CashflowDirection | null
+  category: string
+  bucket: InvestmentBucket | null
+  investment_action: InvestmentAction | null
+  enabled: boolean
+  note: string
+}
+
+export interface CashflowRuleInput {
+  priority: number
+  pattern: string
+  match_field: 'counterparty' | 'description' | 'category' | 'any'
+  direction: CashflowDirection | null
+  category: string
+  bucket: InvestmentBucket | null
+  investment_action: InvestmentAction | null
+  enabled: boolean
+  note: string
+}
+
+export interface CashflowBalance {
+  id: number
+  date: string
+  bucket: InvestmentBucket
+  balance: number
+  note: string
+  source: string
+  updated_at: string
+}
+
+export interface CashflowBalanceInput {
+  date: string
+  bucket: InvestmentBucket
+  balance: number
+  note: string
+}
+
+export interface CashflowMonth {
+  month: string
+  income: number
+  expense: number
+  net_savings: number
+  savings_rate: number | null
+  income_recurring: number
+  expense_recurring: number
+  net_savings_recurring: number
+  savings_rate_recurring: number | null
+  investment_buy: number
+  investment_sell: number
+  investment_net: number
+  bucket_buy: Record<string, number>
+  one_off_income: number
+  one_off_expense: number
+  transaction_count: number
+  uncategorized_count: number
+}
+
+export interface CashflowCategoryTotal {
+  category: string
+  amount: number
+  one_off_amount: number
+  share: number
+  count: number
+}
+
+export interface CashflowBucketFlow {
+  bucket: InvestmentBucket
+  buy: number
+  sell: number
+  net: number
+  buy_share: number
+}
+
+export interface CashflowBalancePoint {
+  month: string
+  balances: Record<string, number>
+  total: number
+}
+
+export interface CashflowSummary {
+  from_date: string | null
+  to_date: string | null
+  latest_month: string | null
+  inflation_assumption: number
+  months: CashflowMonth[]
+  income_categories: CashflowCategoryTotal[]
+  expense_categories: CashflowCategoryTotal[]
+  investment_buckets: CashflowBucketFlow[]
+  balances: CashflowBalancePoint[]
+  latest_balances: Record<string, number>
+  total_income: number
+  total_expense: number
+  total_net_savings: number
+  savings_rate: number | null
+  transaction_count: number
+  uncategorized_count: number
+  warnings: string[]
+}
+
+export interface CashflowAssumptionPreview {
+  monthly_income: number
+  monthly_expense: number
+  savings_rate: number | null
+  months_used: number
+  window_start: string
+  window_end: string
+  excluded_one_off_count: number
+  inflation_assumption: number
+  warnings: string[]
+}
+
+export interface CashflowImportBatch {
+  import_id: string
+  created_at: string
+  source: string
+  account: string
+  filename: string
+  row_count: number
+  imported: number
+  duplicates: number
+  skipped: number
+  warnings: string[]
+}
+
+export interface CashflowImportResult {
+  import_id: string
+  source: string
+  account: string
+  filename: string
+  row_count: number
+  imported: number
+  duplicates: number
+  skipped: number
+  warnings: string[]
+}
+
 export interface CompareItem {
   run_id: string
   name: string

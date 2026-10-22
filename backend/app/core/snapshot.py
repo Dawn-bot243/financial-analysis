@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from ..models import HistoryResponse, RunResponse
+from ..models import AnalysisResponse, HistoryResponse, RunResponse
 
 
 def canonical_json(value: object) -> str:
@@ -68,6 +68,21 @@ def export_snapshot(response: RunResponse, runs_dir: Path) -> Path:
 def export_history_snapshot(response: HistoryResponse, runs_dir: Path) -> Path:
     runs_dir.mkdir(parents=True, exist_ok=True)
     path = runs_dir / f"history-{response.run_id}.json"
+    path.write_text(
+        json.dumps(
+            response.model_dump(mode="json"),
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def export_analysis_snapshot(response: AnalysisResponse, runs_dir: Path) -> Path:
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    path = runs_dir / f"analysis-{response.analysis_id}.json"
     path.write_text(
         json.dumps(
             response.model_dump(mode="json"),

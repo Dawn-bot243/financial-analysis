@@ -113,10 +113,33 @@ def test_history_meta():
         "csi300",
         "csi500",
         "dividend",
+        "sse",
+        "sp500",
         "ndx100",
+        "nikkei",
+        "hsi",
         "gold",
         "bond",
     }
+
+
+@pytest.mark.parametrize("asset", ["sse", "sp500", "nikkei", "hsi"])
+def test_new_indices_have_usable_history(asset):
+    body = {
+        "mode": "single",
+        "asset": asset,
+        "initial_capital": 100_000,
+        "monthly_contribution": 5_000,
+        "lookback_years": 5,
+        "end_date": "2026-10-20",
+    }
+    response = client.post("/api/history/backtest", json=body)
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["terminal_value"] > 0
+    assert payload["effective_end_date"] == "2026-10-20"
+    assert payload["contribution_count"] > 0
+    assert payload["months"] >= 59
 
 
 def test_gold_last_ten_years_backtest():

@@ -1717,3 +1717,494 @@ summary:focus-visible {
   font-size: 11px;
   line-height: 1.5;
 }
+
+/* On-demand AI analysis */
+.analysis-card {
+  margin-top: 18px;
+}
+
+.analysis-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.analysis-head-actions .btn {
+  flex: 0 0 auto;
+}
+
+.analysis-meta {
+  margin: -2px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.analysis-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--blue-100);
+  border-radius: 9px;
+  background: #f4f8ff;
+  color: var(--blue-550);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.analysis-spinner {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border: 2px solid var(--blue-100);
+  border-top-color: var(--series-1);
+  border-radius: 50%;
+  animation: analysis-spin 0.8s linear infinite;
+}
+
+@keyframes analysis-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.analysis-body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 14px;
+}
+
+.analysis-section h4,
+.analysis-body .caveat-box h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.analysis-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.analysis-section-head h4 {
+  margin: 0;
+}
+
+.analysis-suggestions {
+  padding: 13px 15px;
+  border: 1px solid var(--blue-100);
+  border-radius: 10px;
+  background: #f7faff;
+}
+
+.suggestion-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 22px;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.suggestion-list li::marker {
+  color: var(--series-1);
+  font-weight: 700;
+}
+
+.analysis-table td {
+  vertical-align: top;
+}
+
+.analysis-variant-desc {
+  display: block;
+  max-width: 230px;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.analysis-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.analysis-delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
+.analysis-delta em {
+  font-style: normal;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.analysis-delta.better {
+  color: var(--good);
+}
+
+.analysis-delta.worse {
+  color: var(--critical);
+}
+
+.analysis-delta.neutral,
+.analysis-missing {
+  color: var(--muted);
+}
+
+.analysis-baseline-row {
+  background: rgba(11, 11, 11, 0.025);
+}
+
+.analysis-disclaimer {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .analysis-head-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .analysis-head-actions .btn {
+    width: 100%;
+  }
+
+  .analysis-variant-desc {
+    max-width: 180px;
+  }
+}
+
+/* Historical cash-flow and investment structure */
+.cashflow-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cashflow-import-card,
+.cashflow-assumption-card,
+.cashflow-table-card,
+.cashflow-balance-card,
+.cashflow-rules-card {
+  padding: 18px 20px;
+}
+
+.cashflow-source-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.cashflow-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--secondary);
+  font-size: 11px;
+}
+
+.cashflow-field select,
+.cashflow-field input,
+.cashflow-balance-form select,
+.cashflow-balance-form input,
+.cashflow-rule-add select,
+.cashflow-rule-add input,
+.cashflow-filter select,
+.cashflow-table select,
+.cashflow-table input {
+  min-height: 32px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.cashflow-field input[type='file'] {
+  padding: 5px;
+}
+
+.cashflow-mapping {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.cashflow-mapping-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0 14px;
+}
+
+.cashflow-preview-table {
+  max-height: 220px;
+  margin-bottom: 12px;
+}
+
+.cashflow-preview-table td {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cashflow-import-result,
+.cashflow-loading {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--blue-100);
+  border-radius: 8px;
+  background: #f4f8ff;
+  color: var(--blue-550);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.cashflow-import-result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: baseline;
+}
+
+.cashflow-import-result strong {
+  color: var(--ink);
+}
+
+.cashflow-assumption-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cashflow-assumption-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.cashflow-assumption-grid span {
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.cashflow-assumption-grid strong {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cashflow-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.cashflow-chart-card {
+  padding: 16px 18px 8px;
+  min-width: 0;
+}
+
+.cashflow-chart-card .card-head {
+  margin-bottom: 2px;
+}
+
+.cashflow-chart-card h3,
+.cashflow-mini-card h3 {
+  margin-bottom: 2px;
+}
+
+.cashflow-table-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.cashflow-mini-card {
+  padding: 16px 18px;
+  min-width: 0;
+}
+
+.cashflow-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.cashflow-table-card .card-head,
+.cashflow-balance-card .card-head,
+.cashflow-rules-card .card-head {
+  margin-bottom: 10px;
+}
+
+.cashflow-table td {
+  vertical-align: middle;
+}
+
+.cashflow-table select,
+.cashflow-table input:not([type='checkbox']) {
+  width: 100%;
+  min-width: 84px;
+}
+
+.cashflow-desc {
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.cashflow-one-off-row {
+  background: rgba(250, 178, 25, 0.08);
+}
+
+.cashflow-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--secondary);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.muted-cell {
+  color: var(--muted);
+}
+
+.cashflow-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.cashflow-balance-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr 1.2fr auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 10px;
+}
+
+.cashflow-balance-add {
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.cashflow-file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--blue-550);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.cashflow-file-link input {
+  max-width: 170px;
+  color: var(--secondary);
+  font-size: 10px;
+}
+
+.cashflow-rule-add {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 0.9fr 1.1fr 0.9fr 70px auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cashflow-rule-add input[type='number'] {
+  min-width: 60px;
+}
+
+.cashflow-rule-add .btn {
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.cashflow-rule-table {
+  max-height: 380px;
+}
+
+.cashflow-delete {
+  white-space: nowrap;
+}
+
+.empty-inline {
+  padding: 12px 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 1100px) {
+  .cashflow-mapping-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cashflow-rule-add {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cashflow-balance-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cashflow-chart-grid,
+  .cashflow-table-grid,
+  .cashflow-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .cashflow-source-row,
+  .cashflow-mapping-grid,
+  .cashflow-assumption-grid,
+  .cashflow-rule-add,
+  .cashflow-balance-form {
+    grid-template-columns: 1fr;
+  }
+
+  .cashflow-import-card,
+  .cashflow-assumption-card,
+  .cashflow-table-card,
+  .cashflow-balance-card,
+  .cashflow-rules-card {
+    padding: 14px;
+  }
+}

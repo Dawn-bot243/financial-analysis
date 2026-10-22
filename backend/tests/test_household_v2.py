@@ -260,14 +260,18 @@ def test_calibration_snapshot_is_psd_and_complete():
         "csi300",
         "csi500",
         "dividend",
+        "sse",
+        "sp500",
         "ndx100",
+        "nikkei",
+        "hsi",
         "gold",
         "bond",
         "cash",
     ]
     for window in ("5y", "10y", "15y", "full"):
         matrix = np.asarray(calibration["correlations"][window]["matrix"], dtype=float)
-        assert matrix.shape == (7, 7)
+        assert matrix.shape == (11, 11)
         assert np.allclose(matrix, matrix.T)
         assert np.linalg.eigvalsh(matrix).min() > -1e-8
         for asset in calibration["asset_order"]:

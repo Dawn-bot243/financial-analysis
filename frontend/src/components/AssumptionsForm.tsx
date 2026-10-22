@@ -44,6 +44,13 @@ const roleLabels: Record<string, string> = {
   illiquid: '非流动',
 }
 
+const seriesTypeLabels: Record<string, string> = {
+  total_return_index: '官方全收益',
+  total_return_spliced: '官方TR + ETF补长',
+  price: '价格指数',
+  fixed: '固定假设',
+}
+
 const eventKindLabels: Record<EventKind, string> = {
   one_off: '一次性支出',
   recurring_income: '持续收入',
@@ -808,12 +815,18 @@ export default function AssumptionsForm({
                       <td className="source-cell">
                         {meta ? (
                           <>
-                            <div>{meta.series_type}</div>
+                            <div title={meta.note}>
+                              {seriesTypeLabels[meta.series_type] ??
+                                meta.series_type}
+                            </div>
                             <div>
                               {stats
                                 ? `${stats.start} 起 · ${stats.months} 月`
                                 : '—'}
                             </div>
+                            {meta.series_type === 'total_return_spliced' ? (
+                              <span className="role-tag">ETF补长</span>
+                            ) : null}
                             {stats?.is_short ? (
                               <span className="role-tag warning-tag">
                                 历史不足

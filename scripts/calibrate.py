@@ -4,11 +4,18 @@ The raw series live in backend/data/market/*.csv (gitignored). This script
 computes annualized geometric returns, volatilities and correlations for
 5y/10y/15y/full windows and writes backend/app/data/calibration.json.
 
-All return series are official total-return indices:
+Return series:
   - CSI H00300 / H00905 / H00922
-  - Nasdaq-100 XNDX, converted to CNY with BOC USD/CNY
+  - S&P 500 Total Return ^SP500TR and Nasdaq-100 XNDX, converted to CNY
+    with BOC USD/CNY
+  - Nikkei 225 Total Return and Hang Seng Gross Total Return, converted to
+    CNY with BOC JPY/CNY and HKD/CNY; earlier history uses ETF adjusted NAV
+  - Shanghai Composite Total Return 000888, extended earlier with 510210
+    SSE Composite ETF cumulative NAV
   - ChinaBond New Composite Wealth Index
 Gold is a price series (no dividends); cash is a fixed real-return assumption.
+The Shanghai/Nikkei/HSI series are marked total_return_spliced, not pure
+official indices.
 
 Run:
     python scripts/calibrate.py
@@ -28,9 +35,33 @@ ROOT = Path(__file__).resolve().parents[1]
 MARKET_DIR = ROOT / "backend" / "data" / "market"
 OUT_PATH = ROOT / "backend" / "app" / "data" / "calibration.json"
 
-ASSET_ORDER = ["csi300", "csi500", "dividend", "ndx100", "gold", "bond", "cash"]
-CALIBRATED = ["csi300", "csi500", "dividend", "ndx100", "gold", "bond"]
-SOURCE_FILES = CALIBRATED + ["ndx100_usd", "usdcny"]
+ASSET_ORDER = [
+    "csi300",
+    "csi500",
+    "dividend",
+    "sse",
+    "sp500",
+    "ndx100",
+    "nikkei",
+    "hsi",
+    "gold",
+    "bond",
+    "cash",
+]
+CALIBRATED = [asset for asset in ASSET_ORDER if asset != "cash"]
+SOURCE_FILES = CALIBRATED + [
+    "ndx100_usd",
+    "usdcny",
+    "sp500_tr_usd",
+    "sse_tr_cny",
+    "sse_etf_cny",
+    "nikkei_tr_jpy",
+    "nikkei_etf_jpy",
+    "hsi_tr_hkd",
+    "hsi_etf_hkd",
+    "hkdcny",
+    "jpydncy",
+]
 INFLATION = 0.02
 END = pd.Timestamp("2026-09-30")
 WINDOWS: dict[str, int | None] = {"5y": 5, "10y": 10, "15y": 15, "full": None}
@@ -62,6 +93,42 @@ META = {
         "fee_included": False,
         "expense_ratio": 0.0,
         "note": "官方全收益指数，分红再投资；未扣产品费率",
+    },
+    "sse": {
+        "label": "上证指数",
+        "role": "growth",
+        "series_type": "total_return_spliced",
+        "source": "上证综合全收益 000888（2020-07 起）+ 上证指数ETF 510210 复权净值（更早）",
+        "fee_included": False,
+        "expense_ratio": 0.0,
+        "note": "官方全收益 + ETF代理补长；人民币；ETF段含分红、扣ETF费率；不是纯官方指数",
+    },
+    "sp500": {
+        "label": "标普500",
+        "role": "growth",
+        "series_type": "total_return_index",
+        "source": "S&P 500 Total Return（USD）× 中行 USD/CNY 中间价",
+        "fee_included": False,
+        "expense_ratio": 0.0,
+        "note": "官方总收益指数换算人民币，含汇率、未对冲；未扣产品费率",
+    },
+    "nikkei": {
+        "label": "日经225",
+        "role": "growth",
+        "series_type": "total_return_spliced",
+        "source": "Nikkei 225 Total Return（2023-01 起官方日频）+ 1320.T Nikkei 225 ETF 复权（更早）× 中行 JPY/CNY",
+        "fee_included": False,
+        "expense_ratio": 0.0,
+        "note": "官方全收益 + ETF代理补长；含日元汇率、未对冲；ETF段扣费率",
+    },
+    "hsi": {
+        "label": "恒生指数",
+        "role": "growth",
+        "series_type": "total_return_spliced",
+        "source": "恒生指数总收益 10068（2021-10 起官方）+ 2800.HK Tracker Fund 复权（更早）× 中行 HKD/CNY",
+        "fee_included": False,
+        "expense_ratio": 0.0,
+        "note": "官方总收益 + ETF代理补长；含港币汇率、未对冲；ETF段扣费率",
     },
     "ndx100": {
         "label": "纳斯达克100（人民币，未对冲）",
@@ -232,7 +299,11 @@ def main() -> None:
         "data_version": data_version,
         "disclaimer": (
             "全部权益与债券收益使用官方全收益/财富指数：CSI H00300/H00905/H00922、"
-            "Nasdaq XNDX（按中行 USD/CNY 换算人民币）、中债新综合财富指数。"
+            "标普500 Total Return、Nasdaq XNDX（均按中行汇率换算人民币）、"
+            "中债新综合财富指数。"
+            "上证指数、日经225、恒生指数采用“官方全收益 + ETF复权净值补长”："
+            "官方段从各自可得日期开始，更早区间用对应ETF复权净值（含分红、扣ETF费率）；"
+            "这些资产在 series_type 中标记为 total_return_spliced，不是纯官方指数。"
             "黄金使用 COMEX 黄金连续（USD/oz）× 中行 USD/CNY，折算人民币/克；"
             "无分红、含汇率、未对冲；现金为 0% 实际收益假设。"
             "官方指数未扣产品费率，可在资产假设里另行添加。"

@@ -28,6 +28,7 @@ import ResultsView from './components/ResultsView'
 import ComparisonTable from './components/ComparisonTable'
 import SimpleView from './components/SimpleView'
 import HistoryView from './components/HistoryView'
+import CashflowView from './components/CashflowView'
 
 function EmptyState({ mode }: { mode: 'result' | 'compare' | 'paths' }) {
   return (
@@ -64,15 +65,19 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState<'result' | 'compare' | 'paths'>('result')
   const [activeRunId, setActiveRunId] = useState<string | null>(null)
-  const [mode, setMode] = useState<'simple' | 'full' | 'history'>(() => {
+  const [mode, setMode] = useState<
+    'simple' | 'full' | 'history' | 'cashflow'
+  >(() => {
     const requestedRun = new URLSearchParams(window.location.search).get('run')
     if (requestedRun) return 'full'
     const stored = localStorage.getItem('finance-mode')
-    if (stored === 'full' || stored === 'history') return stored
+    if (stored === 'full' || stored === 'history' || stored === 'cashflow') {
+      return stored
+    }
     return 'simple'
   })
 
-  const switchMode = (next: 'simple' | 'full' | 'history') => {
+  const switchMode = (next: 'simple' | 'full' | 'history' | 'cashflow') => {
     setMode(next)
     localStorage.setItem('finance-mode', next)
     const url = new URL(window.location.href)
@@ -575,9 +580,45 @@ export default function App() {
         >
           历史定投
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === 'cashflow'}
+          className={mode === 'cashflow' ? 'mode-btn active' : 'mode-btn'}
+          onClick={() => switchMode('cashflow')}
+        >
+          收支分析
+        </button>
       </div>
 
-      {mode === 'history' ? (
+      {mode === 'cashflow' ? (
+        <CashflowView
+          onApplyAssumptions={(patch) => {
+            if (!form) return
+            setForm((previous) =>
+              previous
+                ? {
+                    ...previous,
+                    monthlyIncome: patch.monthlyIncome,
+                    monthlyExpense: patch.monthlyExpense,
+                  }
+                : previous,
+            )
+            setMode('full')
+            localStorage.setItem('finance-mode', 'full')
+            const url = new URL(window.location.href)
+            url.searchParams.delete('run')
+            window.history.replaceState(null, '', url)
+            setResult(null)
+            setActiveRunId(null)
+            setComparison(null)
+            setPathComparison(null)
+            setTab('result')
+            setError(null)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+        />
+      ) : mode === 'history' ? (
         <HistoryView />
       ) : mode === 'simple' ? (
         calibration ? (

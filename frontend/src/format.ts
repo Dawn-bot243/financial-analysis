@@ -5,6 +5,10 @@ export function fmtMoney(yuan: number): string {
   return `${yuan.toFixed(0)}元`
 }
 
+export function fmtYuan(yuan: number): string {
+  return `${yuan.toLocaleString('zh-CN', { maximumFractionDigits: 2 })}元`
+}
+
 export function fmtPct(value: number): string {
   return `${(value * 100).toFixed(1)}%`
 }

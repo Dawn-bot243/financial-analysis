@@ -8,13 +8,29 @@ from .models import AssetAssumption
 CALIBRATION_PATH = Path(__file__).resolve().parent / "data" / "calibration.json"
 DEFAULT_WINDOW = "10y"
 
-ASSET_ORDER = ["csi300", "csi500", "dividend", "ndx100", "gold", "bond", "cash"]
+ASSET_ORDER = [
+    "csi300",
+    "csi500",
+    "dividend",
+    "sse",
+    "sp500",
+    "ndx100",
+    "nikkei",
+    "hsi",
+    "gold",
+    "bond",
+    "cash",
+]
 
 ASSET_LABELS = {
     "csi300": "沪深300",
     "csi500": "中证500",
     "dividend": "中证红利",
+    "sse": "上证指数",
+    "sp500": "标普500",
     "ndx100": "纳斯达克100",
+    "nikkei": "日经225",
+    "hsi": "恒生指数",
     "gold": "黄金",
     "bond": "债券",
     "cash": "现金",
